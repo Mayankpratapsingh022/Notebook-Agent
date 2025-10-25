@@ -1,74 +1,74 @@
-# Root level gitignore for Notebook Agent project
+# Notebook Agent - Root Level .gitignore
+# Comprehensive ignore patterns for full-stack project
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-Desktop.ini
+# ===========================================
+# NODE.JS / FRONTEND PATTERNS
+# ===========================================
 
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# Logs
-*.log
-logs/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Temporary folders
-tmp/
-temp/
-.tmp/
-
-# Environment files
-.env*
-!.env.example
-
-# Cache directories
-.cache/
-.parcel-cache/
-.pytest_cache/
-.coverage/
-htmlcov/
-.nyc_output/
+# Dependencies
+node_modules/
+/node_modules/
+**/node_modules/
+FrontEnd/my-app/node_modules/
+FrontEnd/*/node_modules/
+jspm_packages/
 
 # Build outputs
 build/
 dist/
 out/
 .next/
+/.next/
+**/.next/
+FrontEnd/my-app/.next/
+FrontEnd/*/.next/
 .nuxt/
+.turbo/
 
-# Dependencies
-node_modules/
-jspm_packages/
+# Cache directories
+.cache/
+.parcel-cache/
+.npm/
+.eslintcache
+.node_repl_history
+**/.cache/
+**/.npm/
+.mypy_cache/
+**/.mypy_cache/
 
-# Python specific (for any Python files in root)
+# Next.js specific
+.next/
+/.next/
+next-env.d.ts
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Package manager files
+*.tgz
+.yarn-integrity
+# Uncomment if you want to ignore lock files:
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# ===========================================
+# PYTHON / BACKEND PATTERNS
+# ===========================================
+
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+
+# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -82,6 +82,7 @@ parts/
 sdist/
 var/
 wheels/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -94,41 +95,150 @@ ENV/
 env.bak/
 venv.bak/
 .venv/
+**/venv/
+**/env/
+Backend/venv/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# ===========================================
+# ENVIRONMENT & SECRETS
+# ===========================================
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Secrets and config
+secrets.json
+.secrets
+config.ini
+
+# ===========================================
+# DATABASE & DATA FILES
+# ===========================================
 
 # Database files
 *.db
 *.sqlite
 *.sqlite3
 
-# Configuration files with sensitive data
-config.ini
-secrets.json
-.secrets
+# Large data files (uncomment if needed)
+# *.pkl
+# *.joblib
+# *.h5
+# *.hdf5
+# models/
+# data/
+# datasets/
+# *.csv
+# *.json
+# *.parquet
 
-# Model and data files (if large)
-*.pkl
-*.joblib
-*.h5
-*.hdf5
-models/
-data/
-datasets/
-*.csv
-*.json
-*.parquet
+# ===========================================
+# IDE & EDITOR FILES
+# ===========================================
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Vim/Emacs
+*.swp
+*.swo
+*~
+.#*
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ===========================================
+# OS GENERATED FILES
+# ===========================================
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+
+# ===========================================
+# RUNTIME & TEMPORARY FILES
+# ===========================================
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Logs
+logs/
+*.log
+
+# ===========================================
+# PROJECT SPECIFIC
+# ===========================================
 
 # Jupyter notebook checkpoints
 .ipynb_checkpoints/
 
+# Modal specific
+.modal_cache/
+modal_cache/
+
 # Coverage reports
 coverage/
 *.lcov
+.nyc_output/
 
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
+# Storybook
+.out
+.storybook-out
 
 # Microbundle cache
 .rpt2_cache/
@@ -136,36 +246,25 @@ coverage/
 .rts2_cache_es/
 .rts2_cache_umd/
 
-# Optional REPL history
-.node_repl_history
+# ===========================================
+# ADDITIONAL PATTERNS
+# ===========================================
 
-# Output of 'npm pack'
-*.tgz
+# Backup files
+*.bak
+*.backup
+*.old
 
-# Yarn Integrity file
-.yarn-integrity
+# Archive files
+*.zip
+*.tar.gz
+*.rar
+*.7z
 
-# Modal specific
-.modal_cache/
-modal_cache/
-
-# FastAPI specific
-.pytest_cache/
-htmlcov/
-
-# Storybook build outputs
-.out
-.storybook-out
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# Project specific
-# Add any project-specific files or directories to ignore here
+# Lock files (uncomment if needed)
+# *.lock
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+# Pipfile.lock
+# poetry.lock
