@@ -349,20 +349,27 @@ import React, {
 
         if (response.ok) {
           const result = await response.json();
+          console.log('Execution result:', result);
+          console.log('Outputs:', result.outputs);
+          console.log('Number of outputs:', result.outputs?.length);
           
           // Update cell with outputs
-          setNotebookData(prev => ({
-            ...prev,
-            cells: prev.cells.map(cell => 
-              cell.id === cellId 
-                ? { 
-                    ...cell, 
-                    outputs: result.outputs,
-                    execution_count: kernelStatus.execution_count + 1
-                  } 
-                : cell
-            )
-          }));
+          setNotebookData(prev => {
+            const updated = {
+              ...prev,
+              cells: prev.cells.map(cell => 
+                cell.id === cellId 
+                  ? { 
+                      ...cell, 
+                      outputs: result.outputs,
+                      execution_count: kernelStatus.execution_count + 1
+                    } 
+                  : cell
+              )
+            };
+            console.log('Updated notebook data:', updated);
+            return updated;
+          });
 
           // Update kernel status
           await checkKernelStatus();
@@ -425,6 +432,7 @@ import React, {
             <CellInsertionZone 
               onAddCode={() => addCell(notebookData.cells.length, "code")}
               onAddMarkdown={() => addCell(notebookData.cells.length, "markdown")}
+              isEndZone={true}
             />
           </div>
         </div>
@@ -654,38 +662,194 @@ import React, {
             </div>
 
             {/* Cell Outputs */}
-            {cell.outputs && cell.outputs.length > 0 && (
+            {cell.outputs && cell.outputs.length > 0 ? (
               <div className="mt-2 p-3 bg-neutral-900 border-t border-neutral-600">
+                <div className="text-xs text-blue-400 mb-2">
+                  📊 Outputs ({cell.outputs.length}): {cell.outputs.map(o => o.output_type).join(', ')}
+                </div>
+                {(() => {
+                  console.log('Rendering outputs for cell:', cell.id, cell.outputs);
+                  console.log('Cell has outputs:', cell.outputs.length, 'outputs');
+                  console.log('Output types:', cell.outputs.map(o => o.output_type));
+                  return null;
+                })()}
                 {cell.outputs.map((output, outputIndex) => (
                   <div key={outputIndex} className="mb-2 last:mb-0">
+                    {/* Stream output (stdout/stderr) */}
                     {output.output_type === 'stream' && (
                       <div className="bg-neutral-800 p-2 rounded text-sm font-mono text-green-400 whitespace-pre-wrap">
-                        {output.text}
+                        {output.data?.text || output.text}
                       </div>
                     )}
-                    {output.output_type === 'display_data' && output.data && output.data['image/png'] && (
+                    
+                    {/* Display data (images, plots, etc.) */}
+                    {output.output_type === 'display_data' && output.data && (
                       <div className="bg-neutral-800 p-2 rounded">
-                        <img 
-                          src={`data:image/png;base64,${output.data['image/png']}`} 
-                          alt="Plot output" 
-                          className="max-w-full h-auto rounded"
-                        />
+                        {(() => {
+                          console.log('Display data output:', output);
+                          return null;
+                        })()}
+                        {/* Interactive HTML content (Plotly, etc.) */}
+                        {output.data['text/html'] && (
+                          <div>
+                            {(() => {
+                              console.log('Rendering HTML output:', output.data['text/html'].substring(0, 200) + '...');
+                              return null;
+                            })()}
+                            <div 
+                              dangerouslySetInnerHTML={{ 
+                                __html: output.data['text/html'] 
+                              }}
+                              className="max-w-full"
+                              style={{ width: '100%', height: 'auto' }}
+                            />
+                          </div>
+                        )}
+                        {/* SVG images (high quality vector graphics) */}
+                        {output.data['image/svg+xml'] && !output.data['text/html'] && (
+                          <div 
+                            dangerouslySetInnerHTML={{ 
+                              __html: output.data['image/svg+xml'] 
+                            }}
+                            className="max-w-full"
+                          />
+                        )}
+                        {/* PNG images (fallback for static images) */}
+                        {output.data['image/png'] && !output.data['text/html'] && !output.data['image/svg+xml'] && (
+                          <img 
+                            src={`data:image/png;base64,${output.data['image/png']}`} 
+                            alt="Plot output" 
+                            className="max-w-full h-auto rounded"
+                          />
+                        )}
+                        {/* JPEG images */}
+                        {output.data['image/jpeg'] && !output.data['text/html'] && !output.data['image/svg+xml'] && !output.data['image/png'] && (
+                          <img 
+                            src={`data:image/jpeg;base64,${output.data['image/jpeg']}`} 
+                            alt="Image output" 
+                            className="max-w-full h-auto rounded"
+                          />
+                        )}
+                        {/* PDF documents */}
+                        {output.data['application/pdf'] && (
+                          <div className="bg-neutral-700 p-4 rounded border border-neutral-600">
+                            <div className="flex items-center gap-2 mb-2">
+                              <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                              </svg>
+                              <span className="text-red-400 font-medium">PDF Document</span>
+                            </div>
+                            <p className="text-neutral-300 text-sm">PDF content is available but cannot be displayed inline. Download the file to view.</p>
+                          </div>
+                        )}
+                        {/* LaTeX content */}
+                        {output.data['text/latex'] && (
+                          <div className="bg-neutral-700 p-4 rounded border border-neutral-600">
+                            <div className="flex items-center gap-2 mb-2">
+                              <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                              </svg>
+                              <span className="text-blue-400 font-medium">LaTeX Content</span>
+                            </div>
+                            <pre className="text-neutral-300 font-mono text-sm whitespace-pre-wrap bg-neutral-800 p-2 rounded">
+                              {output.data['text/latex']}
+                            </pre>
+                          </div>
+                        )}
+                        {/* JavaScript content */}
+                        {output.data['application/javascript'] && (
+                          <div className="bg-neutral-700 p-4 rounded border border-neutral-600">
+                            <div className="flex items-center gap-2 mb-2">
+                              <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                              </svg>
+                              <span className="text-yellow-400 font-medium">JavaScript Code</span>
+                            </div>
+                            <pre className="text-neutral-300 font-mono text-sm whitespace-pre-wrap bg-neutral-800 p-2 rounded">
+                              {output.data['application/javascript']}
+                            </pre>
+                          </div>
+                        )}
+                        {/* Plain text */}
+                        {output.data['text/plain'] && (
+                          <div className="text-green-400 font-mono text-sm whitespace-pre-wrap">
+                            {output.data['text/plain']}
+                          </div>
+                        )}
+                        {/* JSON data */}
+                        {output.data['application/json'] && (
+                          <pre className="text-green-400 font-mono text-sm whitespace-pre-wrap bg-neutral-900 p-2 rounded">
+                            {JSON.stringify(JSON.parse(output.data['application/json']), null, 2)}
+                          </pre>
+                        )}
                       </div>
                     )}
+                    
+                    {/* Error output */}
                     {output.output_type === 'error' && (
                       <div className="bg-red-900/20 border border-red-600 p-2 rounded text-sm">
                         <div className="text-red-400 font-semibold">
-                          {output.ename}: {output.evalue}
+                          {output.data?.ename || output.ename}: {output.data?.evalue || output.evalue}
                         </div>
-                        {output.traceback && (
+                        {(output.data?.traceback || output.traceback) && (
                           <div className="text-red-300 font-mono text-xs mt-1 whitespace-pre-wrap">
-                            {output.traceback.join('\n')}
+                            {(output.data?.traceback || output.traceback).join('\n')}
                           </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Execute result (for expressions that return values) */}
+                    {output.output_type === 'execute_result' && output.data && (
+                      <div className="bg-neutral-800 p-2 rounded text-sm">
+                        {output.data['text/plain'] && (
+                          <div className="text-blue-400 font-mono whitespace-pre-wrap">
+                            {output.data['text/plain']}
+                          </div>
+                        )}
+                        {output.data['text/html'] && (
+                          <div 
+                            dangerouslySetInnerHTML={{ 
+                              __html: output.data['text/html'] 
+                            }}
+                            className="max-w-full"
+                          />
+                        )}
+                        {output.data['image/svg+xml'] && (
+                          <div 
+                            dangerouslySetInnerHTML={{ 
+                              __html: output.data['image/svg+xml'] 
+                            }}
+                            className="max-w-full"
+                          />
+                        )}
+                        {output.data['image/png'] && (
+                          <img 
+                            src={`data:image/png;base64,${output.data['image/png']}`} 
+                            alt="Result image" 
+                            className="max-w-full h-auto rounded"
+                          />
+                        )}
+                        {output.data['image/jpeg'] && (
+                          <img 
+                            src={`data:image/jpeg;base64,${output.data['image/jpeg']}`} 
+                            alt="Result image" 
+                            className="max-w-full h-auto rounded"
+                          />
+                        )}
+                        {output.data['application/json'] && (
+                          <pre className="text-blue-400 font-mono text-sm whitespace-pre-wrap bg-neutral-900 p-2 rounded">
+                            {JSON.stringify(JSON.parse(output.data['application/json']), null, 2)}
+                          </pre>
                         )}
                       </div>
                     )}
                   </div>
                 ))}
+              </div>
+            ) : (
+              <div className="mt-2 p-2 text-xs text-neutral-500">
+                No outputs yet. Run the cell to see results.
               </div>
             )}
           </div>
@@ -709,10 +873,25 @@ import React, {
   interface CellInsertionZoneProps {
     onAddCode: () => void;
     onAddMarkdown: () => void;
+    isEndZone?: boolean;
   }
 
-  const CellInsertionZone = ({ onAddCode, onAddMarkdown }: CellInsertionZoneProps) => {
+  const CellInsertionZone = ({ onAddCode, onAddMarkdown, isEndZone = false }: CellInsertionZoneProps) => {
     const [isHovered, setIsHovered] = useState(false);
+
+    if (isEndZone) {
+      return (
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={onAddCode}
+            className="flex items-center gap-2 px-6 py-3 bg-neutral-700 hover:bg-neutral-600 border border-neutral-600 hover:border-neutral-500 rounded-lg text-neutral-200 transition-all duration-200 shadow-sm hover:shadow-md"
+          >
+            <FiPlus className="w-4 h-4" />
+            <span className="font-medium">Add a cell</span>
+          </button>
+        </div>
+      );
+    }
 
     return (
       <div 

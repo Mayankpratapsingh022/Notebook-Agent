@@ -48,7 +48,12 @@ Notebook Agent/
 
 4. **Set up Modal:**
    ```bash
-   modal token set
+   # Modal is already included in requirements.txt
+   # Just authenticate with Modal
+   modal setup
+   
+   # Follow the prompts to authenticate with your Modal account
+   # This will create the necessary authentication files
    ```
 
 5. **Start the backend server:**
